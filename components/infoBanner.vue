@@ -72,7 +72,7 @@
                     class="noborderbutton"
                     title="回覆"
                     @click="$emit('selecttopic')">
-                        <img class="imggood" src="~/static/reply.png" />
+                        <img class="imggood" src="~/assets/reply.png" />
                 </b-button>
             </span>
             <span v-else-if="loginUser === topicToShowed.sponsor">
@@ -80,7 +80,7 @@
                     <b-button 
                         class="noborderbutton"
                         title="已有回應、無法刪除">
-                            <img class="imggood" src="~/static/nodelete.png" />
+                            <img class="imggood" src="~/assets/nodelete.png" />
                     </b-button>
                 </span>
                 <span v-else>
@@ -88,7 +88,7 @@
                         class="noborderbutton"
                         title="刪除"
                         @click="$emit('deletetopic')">
-                            <img class="imggood" src="~/static/delete.png" />
+                            <img class="imggood" src="~/assets/delete.png" />
                     </b-button>
                 </span>
             </span>
@@ -98,7 +98,7 @@
                         class="noborderbutton"
                         title="取消附議"
                         @click="$emit('secondtopic')">
-                            <img class="imggood" src="~/static/second.png" />
+                            <img class="imggood" src="~/assets/second.png" />
                     </b-button>
                 </span>
                 <span v-else>
@@ -106,7 +106,7 @@
                         class="noborderbutton"
                         title="附議"
                         @click="$emit('secondtopic', topicToShowed)">
-                            <img class="imggood_opacity" src="~/static/second.png" />
+                            <img class="imggood_opacity" src="~/assets/second.png" />
                     </b-button>
                 </span>
             </span>
