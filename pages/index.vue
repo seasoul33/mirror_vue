@@ -55,6 +55,8 @@
 
 <script>
 // import Logo from '~/components/Logo.vue';
+import Vue from 'vue';
+import io from 'socket.io-client';
 import { ToggleButton } from 'vue-js-toggle-button';
 import { Button, Modal } from 'bootstrap-vue/es/components';
 import moment from 'moment';
@@ -97,6 +99,21 @@ let topicData=[{
                     }];
 let topicDataB = topicData.slice().reverse();
 
+let socket = io('http://localhost:3001');
+// console.log('ready');
+// socket.emit('mongo_sync',{he: 'hello 1'});
+// socket.emit('mongo_sync',{he: 'hello 2'});
+// socket.emit('mongo_sync',{he: 'hello 3'});
+// let collectionFetchedBySecond;
+// let collectionFetchedByTime;
+let bus=new Vue();
+
+socket.on('mongo_sync', function(msg){
+    let collectionFetchedBySecond = msg.a.slice();//Object.assign({},msg.a);
+    let collectionFetchedByTime = msg.b.slice();//Object.assign({},msg.b);
+    bus.$emit('trigger', {collectionFetchedBySecond, collectionFetchedByTime});
+});
+
 export default {
     components: {
         ToggleButton,
@@ -110,18 +127,28 @@ export default {
     //   topics: Array, //Topics.find({}, { sort: { seconded: -1 } }).fetch(),
     //   topics_time: Array, //Topics.find({}, { sort: { raisedAt: -1 } }).fetch(),
     //   currentUser: Object, //Meteor.user(),
+        // topics:collectionFetchedBySecond,//topicDataB,
+        // topics_time:collectionFetchedByTime,//topicData,
     // },
 
     data: function() {
         return {
-            topics:topicDataB,
-            topics_time:topicData,
+            topics:[],
+            topics_time:[],
             currentUser:{username:"admin"},
             tags:[],
             sort_by_time: false,
             showModal: false,
             selectedTopic:{},
         };
+    },
+
+    mounted: function() {
+        let self = this;
+        bus.$on('trigger', function(content){
+            self.topics = content.collectionFetchedBySecond;
+            self.topics_time = content.collectionFetchedByTime;
+        });
     },
 
     computed: {

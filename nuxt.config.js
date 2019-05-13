@@ -49,6 +49,10 @@ module.exports = {
     extend(config, ctx) {
       // Run ESLint on save
       if (ctx.isDev && ctx.isClient) {
+        babel: {
+            presets: ['es2015', 'stage-0']
+        }
+
         config.module.rules.push({
           // enforce: 'pre',
           // test: /\.(js|vue)$/,
