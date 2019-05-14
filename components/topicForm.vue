@@ -59,6 +59,8 @@
 
 <script>
 import { Button, Badge } from 'bootstrap-vue/es/components';
+import moment from 'moment';
+const timeFormat='YYYY-MM-DD  HH:mm:ss';
 
 export default {
     components: {
@@ -100,34 +102,35 @@ export default {
                 event.preventDefault();
             }
 
-            // if(Meteor.user()) {
-                if(this.loginUser === 'admin') {
-                    if(this.topicToShowed.anwser.length === 0) {
-                        return;
-                    }
-
-                    this.emitTopic = Object.assign({},this.topicToShowed);
-
-                    this.$emit('update', this.emitTopic);
+            if(this.loginUser === 'admin') {
+                if(this.topicToShowed.anwser.length === 0) {
+                    return;
                 }
-                else {
-                    if(this.newTopic.title.length === 0) {
-                        this.newTopic.description = '';
-                        this.formTags='';
-                        return;
-                    }
+                
+                this.topicToShowed.replied = 1;
+                this.topicToShowed.repliedTime = moment().format(timeFormat);
 
-                    this.newTopic.tags = this.formTags.trim().split(' ');
-                    this.emitTopic = Object.assign({},this.newTopic);
-                    this.$emit('insert', this.emitTopic);
+                this.emitTopic = Object.assign({},this.topicToShowed);
 
-                    // Clear form
-                    this.newTopic.title = '';
+                this.$emit('update', this.emitTopic);
+            }
+            else {
+                if(this.newTopic.title.length === 0) {
                     this.newTopic.description = '';
-                    this.newTopic.tags = [];
-                    this.formTags = '';
+                    this.formTags='';
+                    return;
                 }
-            // }
+
+                this.newTopic.tags = this.formTags.trim().split(' ');
+                this.emitTopic = Object.assign({},this.newTopic);
+                this.$emit('insert', this.emitTopic);
+
+                // Clear form
+                this.newTopic.title = '';
+                this.newTopic.description = '';
+                this.newTopic.tags = [];
+                this.formTags = '';
+            }
         }
     }
 }

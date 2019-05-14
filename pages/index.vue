@@ -32,9 +32,8 @@
             <topic
                 :topicToShowed="topic"
                 :loginUser="currentUser.username" 
-                @modalopen="openModal"
-                @modalclose="closeModal"
                 @delete="deletetopic"
+                @update="updateTopic"
                 @selecttopic="selecttopic" />
         </li>
         <!-- </ul> -->
@@ -54,7 +53,6 @@
 </template>
 
 <script>
-// import Logo from '~/components/Logo.vue';
 import Vue from 'vue';
 import io from 'socket.io-client';
 import { ToggleButton } from 'vue-js-toggle-button';
@@ -62,55 +60,15 @@ import { Button, Modal } from 'bootstrap-vue/es/components';
 import moment from 'moment';
 import topicForm from '~/components/topicForm.vue';
 import topic from '~/components/topic.vue';
+const socket = io('http://localhost:3001');
 
 const timeFormat='YYYY-MM-DD  HH:mm:ss';
-
-let topicData=[{
-                        title:'鋼鐵人i love u 3000',
-                        description:'I am iron man',
-                        tags:['ab','bc'],
-                        raisedAt:moment().format(timeFormat),
-                        sponsor: 'cereza',
-                        seconded: 1,
-                        secondlist: [],
-                        replied:1,
-                        repliedTime:moment().format(timeFormat),
-                        anwser: 'gogogo',
-                        accept: 1,
-                        acceptlist: ['HIT'],
-                        suck: 1,
-                        sucklist: ['ping']
-                    },
-                    {
-                        title:'Avenger...assemble!',
-                        description:'Some do, but not us',
-                        tags:['ab','gg'],
-                        raisedAt:moment().format(timeFormat),
-                        sponsor: 'evelyn',
-                        seconded: 2,
-                        secondlist: ['cereza'],
-                        replied:0,
-                        repliedTime:'',
-                        anwser: '',
-                        accept: 2,
-                        acceptlist: ['HIT','ping'],
-                        suck: 0,
-                        sucklist: []
-                    }];
-let topicDataB = topicData.slice().reverse();
-
-let socket = io('http://localhost:3001');
-// console.log('ready');
-// socket.emit('mongo_sync',{he: 'hello 1'});
-// socket.emit('mongo_sync',{he: 'hello 2'});
-// socket.emit('mongo_sync',{he: 'hello 3'});
-// let collectionFetchedBySecond;
-// let collectionFetchedByTime;
 let bus=new Vue();
 
 socket.on('mongo_sync', function(msg){
-    let collectionFetchedBySecond = msg.a.slice();//Object.assign({},msg.a);
-    let collectionFetchedByTime = msg.b.slice();//Object.assign({},msg.b);
+    // console.log(msg);
+    const collectionFetchedBySecond = msg.bySecond.slice();
+    const collectionFetchedByTime = msg.byTime.slice();
     bus.$emit('trigger', {collectionFetchedBySecond, collectionFetchedByTime});
 });
 
@@ -122,33 +80,29 @@ export default {
         topicForm,
         topic,
     },
-  
-    // props: {
-    //   topics: Array, //Topics.find({}, { sort: { seconded: -1 } }).fetch(),
-    //   topics_time: Array, //Topics.find({}, { sort: { raisedAt: -1 } }).fetch(),
-    //   currentUser: Object, //Meteor.user(),
-        // topics:collectionFetchedBySecond,//topicDataB,
-        // topics_time:collectionFetchedByTime,//topicData,
-    // },
-
-    data: function() {
-        return {
-            topics:[],
-            topics_time:[],
-            currentUser:{username:"admin"},
-            tags:[],
-            sort_by_time: false,
-            showModal: false,
-            selectedTopic:{},
-        };
-    },
-
+        
     mounted: function() {
         let self = this;
         bus.$on('trigger', function(content){
             self.topics = content.collectionFetchedBySecond;
             self.topics_time = content.collectionFetchedByTime;
         });
+    },
+
+    // props: {
+        
+    // },
+
+    data: function() {
+        return {
+            topics:[],
+            topics_time:[],
+            currentUser:{username:"noone"},
+            tags:[],
+            sort_by_time: false,
+            showModal: false,
+            selectedTopic:{},
+        };
     },
 
     computed: {
@@ -187,9 +141,10 @@ export default {
         },
 
         openModal() {
-            // if(this.currentUser.username !== 'admin') {
+            if((this.currentUser.username !== 'admin') ||
+               (this.selectedTopic.title !== undefined)) {
                 this.showModal = true;
-            // }
+            }
         },
 
         closeModal() {
@@ -220,13 +175,7 @@ export default {
         },
 
         updateTopic(topicToUpdate) {
-            const updateIndex = this.topics.findIndex(topic => (topic.title==topicToUpdate.title));
-            
-            // TODO: database access
-            this.topics[updateIndex].anwser = topicToUpdate.anwser;
-            this.topics[updateIndex].replied = 1;
-            this.topics[updateIndex].repliedTime = moment().format(timeFormat);;
-            this.topics_time = this.topics.slice().reverse();
+            socket.emit('update', topicToUpdate);
             this.closeModal();
         },
 
@@ -244,20 +193,16 @@ export default {
             topic.suck = 0;
             topic.sucklist = [];
 
-            // TODO: database access
-            console.log("add topic...");
-            this.topics_time.push(topic);
-            this.topics = this.topics_time.slice().reverse();
+            socket.emit('insert', topic);
 
             this.closeModal();
         },
 
-        // temp use
         deletetopic(topicTodelete) {
-            const deleteIndex = this.topics.findIndex(topic => (topic.title==topicTodelete.title));
-            this.topics.splice( deleteIndex, 1);
-            this.topics_time = this.topics.slice().reverse();
+            // console.log(topicTodelete);
+            socket.emit('delete', topicTodelete);
         },
+
         selecttopic(topic) {
             this.selectedTopic = topic;
             this.openModal();

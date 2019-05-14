@@ -25,13 +25,13 @@
                     {{repliedInfo(topicToShowed)}}
                 </div>
                 <infoBanner
-            :topic-to-showed="topicToShowed"
-            :login-user="loginUser"
-            @tagchange="handleTagChange"
-            @comment="comment"
-            @selecttopic="$emit('selecttopic', topicToShowed)"
-            @deletetopic="deletetopic"
-            @secondtopic="secondtopic" />
+                    :topic-to-showed="topicToShowed"
+                    :login-user="loginUser"
+                    @tagchange="handleTagChange"
+                    @comment="comment"
+                    @selecttopic="$emit('selecttopic', topicToShowed)"
+                    @deletetopic="deletetopic"
+                    @secondtopic="secondtopic" />
             </b-modal>
         </div>
         <infoBanner
@@ -82,9 +82,7 @@ export default {
         },
 
         openModal() {
-            // if(this.currentUser.username !== 'admin') {
-                this.showModal = true;
-            // }
+            this.showModal = true;
         },
 
         closeModal() {
@@ -92,7 +90,8 @@ export default {
         },
 
         handleTagChange(tags) {
-            console.log("update DB");
+            this.topicToShowed.tags = tags;
+            this.$emit('update', this.topicToShowed);
         },
 
         comment() {
@@ -113,49 +112,24 @@ export default {
                 newacceptlist.splice(acceptindex, 1);
                 newsucklist.push(this.loginUser);
 
-                // TODO: database access
-                console.log("Update comment 1");
                 this.topicToShowed.acceptlist = newacceptlist;
                 this.topicToShowed.sucklist = newsucklist;
                 this.topicToShowed.accept --;
                 this.topicToShowed.suck ++;
-                // Topics.update(this.topicToShowed._id, 
-                //                 { $set: { accept: this.topicToShowed.accept-1,
-                //                           acceptlist: newacceptlist,
-                //                           suck: this.topicToShowed.suck+1,
-                //                           sucklist: newsucklist,
-                //                         } 
-                //                 }
-                //              );
             }
             else if(suckindex !== -1) {
                 newsucklist.splice(suckindex, 1);
 
-                // TODO: database access
-                console.log("Update comment 2");
                 this.topicToShowed.sucklist = newsucklist;
                 this.topicToShowed.suck --;
-                // Topics.update(this.topicToShowed._id, 
-                //                 { $set: { suck: this.topicToShowed.suck-1,
-                //                           sucklist: newsucklist,
-                //                         } 
-                //                 }
-                //              );
             }
             else {
                 newacceptlist.push(this.loginUser);
 
-                // TODO: database access
-                console.log("Update comment 3");
                 this.topicToShowed.acceptlist = newacceptlist;
                 this.topicToShowed.accept ++;
-                // Topics.update(this.topicToShowed._id, 
-                //                 { $set: { accept: this.topicToShowed.accept+1,
-                //                           acceptlist: newacceptlist
-                //                         } 
-                //                 }
-                //              );
             }
+            this.$emit('update', this.topicToShowed);
             return;
         },
 
@@ -163,10 +137,8 @@ export default {
             if( (this.loginUser === this.topicToShowed.sponsor) &&
                 (this.topicToShowed.replied === 0) ) {
                 
-                // TODO: database access
-                console.log("delete topic");
+                // console.log("delete topic");
                 this.$emit('delete', this.topicToShowed);
-                // Topics.remove(this.props.topic._id);
             }
         },
 
@@ -185,16 +157,10 @@ export default {
                     newlist.splice(index, 1);
                 }
                 
-                // TODO: database access
-                console.log("second topic");
+                // console.log("second topic");
                 this.topicToShowed.seconded = newSeconded;
                 this.topicToShowed.secondlist = newlist;
-                // Topics.update(this.topicToShowed._id, 
-                //     { $set: { seconded: newSeconded,
-                //                 secondlist: newlist
-                //             } 
-                //     }
-                // );
+                this.$emit('update', this.topicToShowed);
             }
         },
     },
