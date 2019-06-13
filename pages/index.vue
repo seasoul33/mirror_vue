@@ -89,14 +89,13 @@ export default {
         });
     },
 
-    // props: {
-        
-    // },
+    props: {
+        topics:[],
+        topics_time:[],
+    },
 
     data: function() {
         return {
-            topics:[],
-            topics_time:[],
             currentUser:{username:"noone"},
             tags:[],
             sort_by_time: false,
