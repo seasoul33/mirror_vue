@@ -2,9 +2,9 @@
     <div>
         <!-- render Statistic -->
         <span class="statistic">
-            <span> <b-badge pill :variant="renderByReplied()">附議 {{topicToShowed.seconded}}</b-badge></span>
-            <span> | <b-badge pill variant="success">接受 {{topicToShowed.accept}}</b-badge></span>
-            <span> <b-badge pill variant="danger">打槍 {{topicToShowed.suck}}</b-badge></span>
+            <span> <b-badge pill variant="info">附議 {{topicToShowed.seconded}}</b-badge></span>
+            <span> | <b-badge pill :variant="renderByReplied('success')">接受 {{topicToShowed.accept}}</b-badge></span>
+            <span> <b-badge pill :variant="renderByReplied('danger')">打槍 {{topicToShowed.suck}}</b-badge></span>
         </span>
 
         <!-- render Tags -->
@@ -137,12 +137,12 @@ export default {
     },
 
     methods: {
-        renderByReplied() {
+        renderByReplied(type) {
             if(this.topicToShowed.replied === 0) {
                 return 'secondary';
             }
 
-            return 'info';
+            return type;
         },
     },
 }
