@@ -3,12 +3,17 @@
         <header>
         <span>
             <span><label :style="toggleSwitchLabelStyle(1)">以附議數量排序</label></span>
-            <span><ToggleButton 
+            <span><ToggleButton
             @change="switchSorting()"
             :value="sort_by_time"
             :color="{checked: 'green',unchecked: 'blue'}" />
             </span>
             <span><label :style="toggleSwitchLabelStyle(2)">以提問時間排序</label></span>
+        </span>
+        <span class="logingroup">
+            <b-button @click="$bvModal.show('login-modal')" variant="outline-success">Sign-in/Sign-up</b-button>
+            <b-button @click="logout" variant="outline-success">Logout</b-button>
+            <b-button @click="check" variant="outline-success">Check</b-button>
         </span>
         </header>
 
@@ -48,6 +53,38 @@
                 @insert="insertTopic" />
         </div>
         <b-button class="closeModal" size="sm" @click="closeModal()">Close</b-button>
+    </b-modal>
+
+    <b-modal id="login-modal" hide-footer>
+        <form>
+            Username: 
+            <input
+                v-model="loginAccount"
+                type="text"
+                placeholder="Your username"
+                required
+            /><br />
+            Password: 
+            <input
+                v-model="loginPasswd"
+                type="text"
+                placeholder="Your password"
+                required
+            /><br />
+            <b-button
+                class="new-button"
+                variant="primary"
+                size="sm"
+                @click="login">Sign-in
+            </b-button>
+            <b-button
+                class="new-button"
+                variant="primary"
+                size="sm"
+                @click="signup">Sign-up
+            </b-button>
+            <!-- <b-button class="closeModal" size="sm" @click="$bvModal.hide('login-modal')">Close</b-button> -->
+        </form>
     </b-modal>
   </section>
 </template>
@@ -90,18 +127,20 @@ export default {
     },
 
     // props: {
-
+        
     // },
 
     data: function() {
         return {
             topics:[],
             topics_time:[],
-            currentUser:{username:"noone"},
+            currentUser:{username:"Anonymous"},
             tags:[],
             sort_by_time: false,
             showModal: false,
             selectedTopic:{},
+            loginAccount: '',
+            loginPasswd: '',
         };
     },
 
@@ -120,6 +159,50 @@ export default {
     },
 
     methods: {
+        async login() {
+            if(this.$auth.loggedIn) {
+                await this.logout();
+            }
+            
+            await this.$auth.loginWith('local', {
+                    data: {
+                        "username": this.loginAccount,
+                        "password": this.loginPasswd
+                    }
+                }).catch(err => {
+                    console.log('Failed Logging In');
+                    console.log(err.message);
+                });
+            this.loginAccount = '';
+            this.loginPasswd = '';
+            this.$bvModal.hide('login-modal');
+            if(this.$auth.loggedIn) {
+                this.currentUser.username = this.$auth.user.username;
+            }
+        },
+
+        async signup() {
+            await this.$axios.post('register', {
+                username: this.loginAccount,
+                password: this.loginPasswd
+            });
+
+            await this.login();
+        },
+
+        check(){
+            console.log(this.$auth.loggedIn);
+            if(this.$auth.loggedIn) {
+                console.log(this.$auth.user.username);
+            }
+            console.log(this.currentUser.username);
+        },
+
+        async logout() {
+            await this.$auth.logout();
+            this.currentUser.username = 'Anonymous';
+        },
+        
         toggleSwitchLabelStyle(labelnum){
             const style_enabled = {color:'black', opacity:1};
             const style_disabled = {color:'gray', opacity:0.5};
@@ -233,19 +316,33 @@ body {
     word-break: break-all;
 }
 
+header {
+    background: #d2edf4;
+    background-image: linear-gradient(to bottom, #d0edf5, #e1e5f0 100%);
+    padding: 2.5% 2% 2% 2.5%;
+    position: relative;
+    /*font-size: 1.5em;*/
+}
+
+header.title {
+    font-size: 2em;
+}
+
 .container {
     max-width: 800px;
-    margin: 0 auto;
-    margin-bottom: 1em;
-    padding-bottom: 1em;
+    /* margin: 0 auto; */
+    /* margin-bottom: 1em; */
+    /* padding-bottom: 1em; */
     min-height: 100%;
     background: transparent;
 }
 
+.logingroup {
+    float: right;
+}
+
 .container-topic {
     width: 75%;
-    /*width: 600px;*/
-    /*margin: 0 auto;*/
     margin-bottom: 1em;
     padding-bottom: 1em;
     min-height: 100%;
@@ -255,9 +352,6 @@ body {
 
 .container-toolbar {
     width: 25%;
-    /*max-width: 200px;*/
-    /*margin: 0 auto;*/
-    /*margin-bottom: 1em;*/
     padding-bottom: 1em;
     min-height: 100%;
     background: #FAEBD7;
@@ -302,18 +396,6 @@ li.checked .text {
 li.private {
     background: #eee;
     border-color: #ddd;
-}
-
-header {
-    background: #d2edf4;
-    background-image: linear-gradient(to bottom, #d0edf5, #e1e5f0 100%);
-    padding: 2.5% 2% 0% 2.5%;
-    position: relative;
-    /*font-size: 1.5em;*/
-}
-
-header.title {
-    font-size: 2em;
 }
 
 .title {

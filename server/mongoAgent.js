@@ -2,8 +2,14 @@ import mongoose from 'mongoose';
 let io = require('socket.io')(3001);
 let socket_io;
 let dbCollection;
+let userCollection;
 
-const schema = {
+const userSchema = {
+    username: String,
+    password: String
+}
+
+const topicSchema = {
     title: String,
     description: String,
     tags: Array,
@@ -70,9 +76,26 @@ export function mongoInit(IPPort, callback) {
                     return null;
                 } else {
                     console.log('Connected to ' + url);
-                    dbCollection = mongoose.model('topics', new mongoose.Schema(schema));
+                    userCollection = mongoose.model('users', new mongoose.Schema(userSchema));
+
+                    dbCollection = mongoose.model('topics', new mongoose.Schema(topicSchema));
                     dbCollection.watch().on('change', changeCallback);
                     socketinit();
                 }
     });
+}
+
+export async function registerUser(user, passwd) {
+    const account = await searchUser(user);
+    if(account == null) {
+        await userCollection.insertMany({username: user, password: passwd});
+        return 'ok'; 
+    }
+    return 'existed';
+}
+
+export async function searchUser(user) {
+    const account = await userCollection.findOne({username: user}).exec();
+    // console.log(account);
+    return account;
 }
