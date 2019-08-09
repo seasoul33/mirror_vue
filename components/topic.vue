@@ -17,13 +17,17 @@
                 </b-button>
                 <b-card
                     :title="topicToShowed.title"
-                    :subTitle="'created at '+opentimestring(topicToShowed)">
+                    :subTitle="raiseInfo(topicToShowed)">
                 </b-card>
-                {{topicToShowed.description}}
+                描述:<br />{{topicToShowed.description}}
+                <br />
                 <br />
                 <div v-if="topicToShowed.replied">
-                    {{repliedInfo(topicToShowed)}}
+                    回覆:
+                    <br />{{topicToShowed.anwser}}
+                    <br />({{repliedInfo(topicToShowed)}})
                 </div>
+                <br />
                 <infoBanner
                     :topic-to-showed="topicToShowed"
                     :login-user="loginUser"
@@ -70,6 +74,10 @@ export default {
 
     methods: {
         opentimestring: function(topic) {
+            return moment(Date.parse(topic.raisedAt)).format('lll');
+        },
+
+        raiseInfo: function(topic) {
             return moment(Date.parse(topic.raisedAt)).format('lll');
         },
 
